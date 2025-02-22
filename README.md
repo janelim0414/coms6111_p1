@@ -10,21 +10,23 @@ In this repo, you will find following files:
 ```
 git clone <url>
 ```
-2. Create a virtual environment \
-MacOS/Linux: \
+2. Create a virtual environment
+
+MacOS/Linux:
 ```
 python3 -m venv venv
 ```
-Windows: \
+Windows:
 ```
 python -m venv venv
 ```
-3. Activate the virtual environment \
-MacOS/Linux: \
+3. Activate the virtual environment
+
+MacOS/Linux:
 ```
 source venv/bin/activate
 ```
-Windows: \
+Windows:
 ```
 venv\Scripts\activate
 ```
@@ -32,12 +34,13 @@ venv\Scripts\activate
 ```
 pip install -r requirements.txt
 ```
-5. Run the program \
-MacOS/Linux: \
+5. Run the program
+
+MacOS/Linux:
 ```
 python3 search.py <precision> "<query>"
 ```
-Windows: \
+Windows:
 ```
 python search.py <precision> "<query>"
 ```
