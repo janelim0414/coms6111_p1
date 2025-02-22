@@ -4,6 +4,7 @@
 In this repo, you will find following files:
 - search.py: implementation of IR system
 - requirements.txt: required modules for running the program
+- .gitignore: ignores `venv` files generated, prevents pushing unrelated files to repo
 
 ### How To Run
 1. Clone this repository 
