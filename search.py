@@ -53,16 +53,32 @@ class CustomSearchEngine:
                 else:
                     print("Invalid input. Please enter 'Y' for Yes or 'N' for No.")
         return relevant_docs, non_relevant_docs
+    
+    def rocchio_algorithm(self, relevant_docs, non_relevant_docs):
+        """Refine query using Rocchio's algo"""
+        alpha, beta, gamma = 1, 0.75, 0.15  # Rocchio coefs
+        query_terms = self.query.lower().split()
 
-    def extract_keywords(self, docs):
-        """Extracts frequently occurring words from relevant documents."""
-        word_counter = Counter()
-        for doc in docs:
-            text = f"{doc['title']} {doc.get('snippet', '')}"
-            words = re.findall(r'\b[a-zA-Z]+\b', text.lower())  # Get all words (no length restriction)
-            filtered_words = [word for word in words if word not in STOPWORDS and word not in set(self.original_query.lower().split())]  # Remove stopwords and original query
-            word_counter.update(filtered_words)
-        self.keywords = word_counter.most_common()  # Store all keywords for query refinement, in order of frequency
+        # Calculate term weights for relevant and non-relevant docs
+        term_weights = {}
+        for doc in relevant_docs:
+            for term in re.findall(r'\b[a-zA-Z]+\b', doc.get('title', '').lower()) + re.findall(r'\b[a-zA-Z]+\b', doc.get('snippet', '').lower()):
+                if term not in set(self.original_query.lower().split()):
+                    term_weights[term] = term_weights.get(term, 0) + beta / len(relevant_docs)
+
+        for doc in non_relevant_docs:
+            for term in re.findall(r'\b[a-zA-Z]+\b', doc.get('title', '').lower()) + re.findall(r'\b[a-zA-Z]+\b', doc.get('snippet', '').lower()):
+                if term not in set(self.original_query.lower().split()):
+                    term_weights[term] = term_weights.get(term, 0) - gamma / len(non_relevant_docs)
+
+        # Add original query terms with alpha weight
+        for term in query_terms:
+            term_weights[term] = term_weights.get(term, 0) + alpha
+
+        # Sort terms by weight, filter out those already in the query
+        sorted_terms = sorted(term_weights.items(), key=lambda x: x[1], reverse=True)
+        filtered_words = [(word, weight) for word, weight in sorted_terms if word not in STOPWORDS and word not in set(self.original_query.lower().split())] 
+        self.keywords = filtered_words
 
     def refine_query(self):
         """Refines the query by adding new words from relevant documents."""
@@ -111,7 +127,7 @@ def main():
             break
         
         # Extract keywords and refine query
-        engine.extract_keywords(relevant_docs)
+        engine.rocchio_algorithm(relevant_docs, non_relevant_docs)
         new_words = engine.refine_query()
 
         if not new_words:
