@@ -6,15 +6,18 @@ import sys
 import re
 from googleapiclient.discovery import build
 from collections import Counter
+from nltk.corpus import stopwords
 
 # Constants
 GOOGLE_API_KEY = "AIzaSyD5f6JL4kwoZhmlZWCXrEFgFUxcFgsFn-U"
 GOOGLE_ENGINE_ID = "c7b4796a0d02a4d2c"
+STOPWORDS = set(stopwords.words('english'))
 
 class CustomSearchEngine:
     def __init__(self, api_key, engine_id, query, precision):
         self.api_key = api_key
         self.engine_id = engine_id
+        self.original_query = query
         self.query = query
         self.precision = precision
 
@@ -56,21 +59,29 @@ class CustomSearchEngine:
         word_counter = Counter()
         for doc in docs:
             text = f"{doc['title']} {doc.get('snippet', '')}"
-            words = re.findall(r'\b[a-zA-Z]{4,}\b', text.lower())  # Filter out short words
-            word_counter.update(words)
-        return [word for word, _ in word_counter.most_common(5)]  # Take top-5 frequent words
+            words = re.findall(r'\b[a-zA-Z]+\b', text.lower())  # Get all words (no length restriction)
+            filtered_words = [word for word in words if word not in STOPWORDS and word not in set(self.original_query.lower().split())]  # Remove stopwords and original query
+            word_counter.update(filtered_words)
+        self.keywords = word_counter.most_common()  # Store all keywords for query refinement, in order of frequency
 
-    def refine_query(self, keywords):
+    def refine_query(self):
         """Refines the query by adding new words from relevant documents."""
-        original_words = set(self.query.split())
-        new_keywords = [word for word in keywords if word not in original_words]
-        
-        if new_keywords:
-            new_query = f"{self.query} {' '.join(new_keywords[:2])}"  # Add top-2 new keywords
-            print(f"\nRefining query to: \"{new_query}\"\n")
-            self.query = new_query
-            return True
-        return False
+        prev_query_without_original = set(self.query.lower().split()) - set(self.original_query.lower().split())
+        # Initialize query frequency mapping (initialize with keywords from previous query - original)
+        query_freq_mapping = {word: dict(self.keywords).get(word, 0) for word in prev_query_without_original}
+        # Add new keywords to query
+        new_words = []
+        for word, cnt in self.keywords: 
+            if len(new_words) == 2:
+                break
+            if word not in prev_query_without_original:
+                query_freq_mapping[word] = cnt
+                new_words.append(word)
+        if len(new_words) == 0:
+            return new_words  # Query not updated
+        ordered_query_mapping = Counter(query_freq_mapping).most_common()  # Sort by frequency
+        self.query = f"{self.original_query} {' '.join([word for word, _ in ordered_query_mapping])}"  # Append ordered query to original
+        return new_words  # Query updated
 
 def main():
     if len(sys.argv) < 3:
@@ -100,12 +111,13 @@ def main():
             break
         
         # Extract keywords and refine query
-        keywords = engine.extract_keywords(relevant_docs)
-        has_refinement = engine.refine_query(keywords)
+        engine.extract_keywords(relevant_docs)
+        new_words = engine.refine_query()
 
-        if not has_refinement:
+        if not new_words:
             print("No further query refinement possible. Stopping.")
             break
+        print(f"Augmenting query by: {' '.join(new_words)}")
 
 if __name__ == "__main__":
     main()
