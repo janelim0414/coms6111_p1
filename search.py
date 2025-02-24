@@ -20,7 +20,6 @@ class CustomSearchEngine:
         self.original_query = query
         self.query = query
         self.precision = precision
-        self.max_new_word = 2
 
     def fetch_results(self):
         """Fetches top-10 search results for a given query."""
@@ -82,7 +81,6 @@ class CustomSearchEngine:
             return new_words  # Query not updated
         ordered_query_mapping = Counter(query_freq_mapping).most_common()  # Sort by frequency
         self.query = f"{self.original_query} {' '.join([word for word, _ in ordered_query_mapping])}"  # Append ordered query to original
-        self.max_new_word += 2
         return new_words  # Query updated
 
 def main():
