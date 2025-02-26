@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pprint
 import sys
 import re
 from googleapiclient.discovery import build
