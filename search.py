@@ -54,13 +54,13 @@ class CustomSearchEngine:
         print(f"{'Engine key'.ljust(max_label_length)} = {self.engine_id}")
         print(f"{'Query'.ljust(max_label_length)} = {self.query}")
         print(f"{'Precision'.ljust(max_label_length)} = {self.precision}")
-        print("Search Results (Top 10):\n========================")
+        print("Google Search Results:\n========================")
 
         # Iterate through results and ask user for feedback
         for i, item in enumerate(results):
             print(f"Result {i+1}\n[\nURL: {item['link']}\nTitle: {item['title']}\nSummary: {item.get('snippet', '')}\n]")
             while True:  # Loop until valid input is received
-                feedback = input("Relevant (Y/N)? ").strip().upper()
+                feedback = input("\nRelevant (Y/N)? ").strip().upper()
                 if feedback == "Y":
                     relevant_docs.append(item)
                     break
@@ -197,7 +197,10 @@ def main():
         # Get user feedback on search results
         relevant_docs, non_relevant_docs = engine.get_relevance_feedback(results)
         precision = len(relevant_docs) / 10.0
-        print(f"\nCurrent Precision@10: {precision:.2f}")
+        print("========================")
+        print("FEEDBACK SUMMARY")
+        print("Query " + init_query)
+        print(f"Current Precision@10: {precision:.2f}")
 
         if precision >= target_precision:
             print("Target precision reached! Stopping.")
@@ -205,6 +208,8 @@ def main():
         elif not relevant_docs:
             print("No relevant results found. Stopping.")
             break
+        elif precision < target_precision:
+            print("Still below the desired precision of " + str(target_precision))
 
         # Apply the Rocchio algorithm with TF-IDF weighting for query expansion
         engine.rocchio_algorithm(relevant_docs, non_relevant_docs)
@@ -214,6 +219,7 @@ def main():
             print("No further query refinement possible. Stopping.")
             break
         print(f"Augmenting query by: {' '.join(new_words)}")
+        print("------------------------")
 
 if __name__ == "__main__":
     main()
