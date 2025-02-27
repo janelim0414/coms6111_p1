@@ -5,7 +5,7 @@ In this repo, you will find the following files:
 - search.py: implementation of IR system
 - requirements.txt: required modules for running the program
 - .gitignore: ignores `venv` files generated, prevents pushing unrelated files to repo
-- transcript.txt: runs of your program on the 3 test cases (per se, wojcicki, milky way)
+- transcript.txt: runs of our program on the 3 test cases (per se, wojcicki, milky way)
 
 ### How To Run
 1. Clone this repository 
