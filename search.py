@@ -5,6 +5,8 @@ import sys
 import re
 from googleapiclient.discovery import build
 from collections import Counter
+import nltk
+nltk.download('stopwords')
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
