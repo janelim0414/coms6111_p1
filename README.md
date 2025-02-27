@@ -82,7 +82,7 @@ This project enhances search precision using Rocchio’s algorithm, refining que
   - gamma = 0.15 -- reduces non-relevant document terms
 3. Selecting and Updating Query Terms
 - Extract words from titles and snippets of search results
-- Calculat term weights with Rocchio's and rank them by their weights
+- Calculate term weights with Rocchio's and rank them by their weights
 - Filter out stopwords and existing query terms
 - Append up to two new words with the highest weight
 - Reorder query terms based on their weights, minus the original query (always placed first)
